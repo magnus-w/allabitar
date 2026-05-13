@@ -714,6 +714,10 @@
       e.target.value = '';
     };
 
+    const updateShow     = v => setData(d => ({ ...d, show: v }));
+    const updateLatest   = v => setData(d => ({ ...d, latestEpisode: v }));
+    const updateEpisodes = v => setData(d => ({ ...d, episodes: v }));
+
     const TABS = [
       { id: 'show',     label: 'Programinfo' },
       { id: 'latest',   label: 'Senaste' },
