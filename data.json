@@ -1,0 +1,64 @@
+{
+  "show": {
+    "name": "Alla Bitar",
+    "tagline": "En podd om musik och de som skapar den.",
+    "description": "Varje avsnitt ett samtal – om hantverket, processen och det som driver en människa att fortsätta skapa.",
+    "expandedDescription": "Alla Bitar startade 2022 ur ett behov av att lyssna djupare på musik och på de människor som gör den. Inte pressreleaser och krönikör, utan riktiga samtal om hantverket, motgångarna och den sällsamma glädjen i att skapa. Podden ges ut varannan vecka och produceras i Stockholm."
+  },
+  "latestEpisode": {
+    "number": "42",
+    "title": "Att hitta sitt ljud",
+    "guest": "Johanna Berg",
+    "spotifyUrl": "https://open.spotify.com",
+    "appleMusicUrl": "https://podcasts.apple.com",
+    "summary": "Johanna Berg har alltid vetat att hon skulle sjunga – men hur hon skulle låta tog år att hitta. Vi pratar om processen bakom hennes senaste skiva, om att skriva på svenska för första gången och om vad det innebär att vara sårbar i sina texter.",
+    "description": "Vi möter Johanna Berg i hennes hem i Södermalm, omgiven av instrument och halvfärdiga texter. Hon berättar om uppväxten i Skellefteå, om de tidiga åren när hon försökte låta som sina förebilder snarare än sig själv, och om det ögonblick när allt klickade på plats.\n\nVi pratar också om hennes samarbete med producenten Marcus Lind, om hur teknik och känsla möts i studion, och om varför hon valde att spela in stora delar av skivan live i samma rum som bandet.\n\nEtt samtal om mod, hantverksskicklighet och konsten att lita på sin röst.",
+    "image": null
+  },
+  "episodes": [
+    {
+      "id": "ep041",
+      "number": "41",
+      "title": "Producera med känsla",
+      "guest": "Marcus Lind",
+      "spotifyUrl": "https://open.spotify.com",
+      "appleMusicUrl": "https://podcasts.apple.com",
+      "summary": "Marcus Lind har producerat skivor åt dussintals svenska artister, men hans arbetsmetod är ovanlig: han börjar alltid med känslan, aldrig med tekniken. Vi pratar om varför han fortfarande spelar in på band och vad det egentligen innebär att producera en människa.",
+      "description": "Marcus berättar om sin väg in i musikbranschen, om åren som studiotekniker och det gradvisa skifte mot att ta mer konstnärliga beslut. Han delar med sig av sina tankar kring hur man skapar ett tryggt rum för artister och varför det ibland handlar mer om psykologi än om ljud.\n\nVi diskuterar också det aktuella klimatet i musikindustrin – streamingekonomins effekter på kreativiteten och varför han tror att det lågfi-ljudet har kommit för att stanna.",
+      "image": null
+    },
+    {
+      "id": "ep040",
+      "number": "40",
+      "title": "Rösten som instrument",
+      "guest": "Elin Krantz",
+      "spotifyUrl": "https://open.spotify.com",
+      "appleMusicUrl": "https://podcasts.apple.com",
+      "summary": "Elin Krantz betraktar rösten som ett instrument med lika stor teknisk och expressiv potential som ett piano. Vi pratar om hennes träning, om sångpedagogens roll och om skillnaden mellan att sjunga och att kommunicera.",
+      "description": "Elin tog klassisk sångutbildning på musikhögskolan men fann tidigt att akademin inte riktigt hade plats för det hon ville göra. Hon beskriver de år hon spenderade med att omdefiniera sin röst utanför institutionens ramar.\n\nVi pratar också om hennes projekt att dokumentera folkliga sångtekniker i Nordsverige och om hur dessa influerar hennes nutida uttryck.",
+      "image": null
+    },
+    {
+      "id": "ep039",
+      "number": "39",
+      "title": "Att skriva under press",
+      "guest": "Erik & Sara Vind",
+      "spotifyUrl": "https://open.spotify.com",
+      "appleMusicUrl": "https://podcasts.apple.com",
+      "summary": "Syskonen Erik och Sara Vind skriver musik tillsammans – men hur fungerar det att skapa i nära relation? Vi pratar om deras arbetsprocess, om konflikterna som leder till bättre låtar och om vad det innebär att dela upphovsrätt med sin syster.",
+      "description": "Det börjar med ett samtal om deras barndomshem – ett hus fullt av musik – och hur de tidigt lärde sig att låtskrivande var ett sätt att kommunicera snarare än ett sätt att prestera.\n\nErik och Sara berättar om hur de delar upp arbetet, om hur det har förändrats över åren, och om en inspelningssession som gick helt fel och resulterade i deras kanske bästa spår hittills.",
+      "image": null
+    },
+    {
+      "id": "ep038",
+      "number": "38",
+      "title": "Från studio till scen",
+      "guest": "Sara Wijk",
+      "spotifyUrl": "https://open.spotify.com",
+      "appleMusicUrl": "https://podcasts.apple.com",
+      "summary": "Sara Wijk spenderar halva sin tid i studion och halva på turnébuss. Men hur översätter man ett skivljud till en livekonsert – och varför väljer hon alltid att göra det annorlunda? Vi pratar om scenrädsla, sceneuphori och allt däremellan.",
+      "description": "Sara beskriver den ångest hon kände inför sin allra första turné och hur hon gradvis har lärt sig att omvandla nervositet till energi. Hon pratar om vikten av ett bra band och om hur dynamiken på scen skiljer sig från dynamiken i studion.\n\nVi pratar också om hennes beslut att aldrig spela låtarna exakt som på skivan – ett val som ibland frustrerar fans men som hon menar är nödvändigt för att hålla musiken levande.",
+      "image": null
+    }
+  ]
+}

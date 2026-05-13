@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alla Bitar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-serif: 'EB Garamond', Georgia, serif;
+      --bg: #faf9f7;
+      --surface: #ffffff;
+      --border: #e8e4de;
+      --border-subtle: #f0ece6;
+      --text-primary: #1a1814;
+      --text-secondary: #6b6560;
+      --text-muted: #9e9890;
+      --spotify: #1DB954;
+      --apple: #b150e2;
+      --radius: 12px;
+      --max-w: 1100px;
+      --px: clamp(20px, 5vw, 64px);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 var(--px);
+    }
+
+    /* ── Labels (spaced caps) ── */
+    .label {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* ── Expand / Collapse ── */
+    .expandable {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.35s ease;
+    }
+    .expandable.open { grid-template-rows: 1fr; }
+    .expandable > div { overflow: hidden; }
+
+    .expand-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: var(--font-sans);
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+    .expand-btn:hover { color: var(--text-primary); }
+    .expand-btn .arrow {
+      display: inline-block;
+      transition: transform 0.35s ease;
+      line-height: 1;
+    }
+    .expand-btn.open .arrow { transform: rotate(180deg); }
+
+    /* ── Platform links ── */
+    .platform-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .platform-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 11px;
+      border-radius: 100px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1.5px solid;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .platform-link:hover { opacity: 0.65; }
+    .platform-link svg { flex-shrink: 0; }
+    .platform-link.spotify { color: var(--spotify); border-color: rgba(29, 185, 84, 0.35); }
+    .platform-link.apple   { color: var(--apple);   border-color: rgba(177, 80, 226, 0.35); }
+
+    /* ── Hero ── */
+    .hero {
+      padding: clamp(52px, 8vw, 100px) 0 clamp(40px, 6vw, 72px);
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-image-slot {
+      display: none;
+      width: 100%;
+      aspect-ratio: 21 / 6;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--border);
+      margin-bottom: 40px;
+    }
+    .hero-image-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-image-slot.visible { display: block; }
+
+    .show-name {
+      font-size: clamp(52px, 9vw, 100px);
+      line-height: 1.02;
+      letter-spacing: -0.025em;
+      margin-bottom: 18px;
+    }
+    .show-name-sans   { font-family: var(--font-sans); font-weight: 700; }
+    .show-name-serif  { font-family: var(--font-serif); font-weight: 400; font-style: italic; }
+
+    .show-tagline {
+      font-size: clamp(15px, 2vw, 20px);
+      font-weight: 300;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      max-width: 540px;
+    }
+    .show-description {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      max-width: 540px;
+      margin-bottom: 22px;
+    }
+    .hero-expanded {
+      max-width: 540px;
+      padding-top: 20px;
+    }
+    .hero-expanded p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+    .hero-expanded p + p { margin-top: 14px; }
+
+    /* ── Section separators ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: clamp(28px, 4vw, 48px) 0 clamp(16px, 2vw, 24px);
+    }
+    .section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Latest Episode Card ── */
+    .latest-section {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: clamp(32px, 5vw, 60px);
+    }
+    .latest-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .latest-card:hover { border-color: var(--text-muted); }
+
+    .card-image-slot {
+      display: none;
+      width: 100%;
+      aspect-ratio: 16 / 6;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .card-image-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-image-slot.visible { display: block; }
+
+    .latest-body {
+      padding: clamp(24px, 4vw, 44px);
+    }
+    .latest-label-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .ep-number-serif {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+    .latest-title {
+      font-size: clamp(20px, 3.5vw, 30px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .latest-guest {
+      font-size: 15px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 22px;
+    }
+    .latest-summary {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      max-width: 680px;
+    }
+    .latest-description {
+      max-width: 680px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 4px;
+    }
+    .latest-description p {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+    .latest-description p + p { margin-top: 14px; }
+
+    /* ── Episodes grid ── */
+    .episodes-section {
+      padding: 0 0 clamp(48px, 7vw, 80px);
+    }
+    .episodes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+      gap: 14px;
+    }
+
+    .episode-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .episode-card:hover { border-color: var(--text-muted); }
+
+    .ep-card-image-slot {
+      display: none;
+      width: 100%;
+      aspect-ratio: 16 / 7;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .ep-card-image-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ep-card-image-slot.visible { display: block; }
+
+    .ep-card-body {
+      padding: 22px 22px 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .ep-label-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .ep-num-serif {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--text-muted);
+      line-height: 1;
+    }
+    .ep-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+      margin-bottom: 5px;
+    }
+    .ep-guest {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    .ep-summary {
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      flex: 1;
+    }
+    .ep-description {
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 4px;
+    }
+    .ep-description p {
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+    .ep-description p + p { margin-top: 12px; }
+  </style>
+</head>
+<body>
+
+<main>
+  <div id="hero-section"></div>
+  <div id="latest-section"></div>
+  <div id="episodes-section"></div>
+</main>
+
+<script>
+  const SPOTIFY_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`;
+
+  const APPLE_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5.34 0A5.328 5.328 0 0 0 0 5.34v13.32A5.328 5.328 0 0 0 5.34 24h13.32A5.328 5.328 0 0 0 24 18.66V5.34A5.328 5.328 0 0 0 18.66 0zm6.525 2.568c2.336 0 4.448.902 6.056 2.587a8.553 8.553 0 0 1 2.138 5.908c-.005 1.473-.494 3.131-1.3 4.393l-.166.232-1.054-.937c.754-1.103 1.232-2.483 1.296-3.765v-.184a6.633 6.633 0 0 0-1.72-4.52 6.617 6.617 0 0 0-4.925-2.195 6.62 6.62 0 0 0-4.892 2.178 6.695 6.695 0 0 0-1.758 4.36v.3a7.948 7.948 0 0 0 1.33 3.903l-1.124.95-.133-.184a10.05 10.05 0 0 1-1.407-4.37 7.677 7.677 0 0 1-.022-.782 8.5 8.5 0 0 1 2.182-5.993 8.365 8.365 0 0 1 5.5-2.885zm.016 2.89a5.763 5.763 0 0 1 5.752 5.503v.224a6.503 6.503 0 0 1-.845 3.018l-.133.226-1.123-.982c.42-.73.643-1.613.662-2.508a4.357 4.357 0 0 0-4.166-4.495 4.355 4.355 0 0 0-4.332 3.947l-.01.286a4.714 4.714 0 0 0 .67 2.509l-1.113.972a6.453 6.453 0 0 1-1.043-3.292v-.14a5.77 5.77 0 0 1 5.68-5.268zm.05 3.645a2.005 2.005 0 0 1 1.997 1.997c0 .78-.443 1.46-1.093 1.796l-.164.079.39 7.441h-2.285l.38-7.44a2.002 2.002 0 0 1-1.218-1.876 2.005 2.005 0 0 1 1.993-1.997z"/></svg>`;
+
+  const FALLBACK_DATA = {
+    show: {
+      name: "Alla Bitar",
+      tagline: "En podd om musik och de som skapar den.",
+      description: "Varje avsnitt ett samtal – om hantverket, processen och det som driver en människa att fortsätta skapa.",
+      expandedDescription: "Alla Bitar startade 2022 ur ett behov av att lyssna djupare på musik och på de människor som gör den. Inte pressreleaser och krönikör, utan riktiga samtal om hantverket, motgångarna och den sällsamma glädjen i att skapa. Podden ges ut varannan vecka och produceras i Stockholm."
+    },
+    latestEpisode: {
+      number: "1",
+      title: "Välkommen till Alla Bitar",
+      guest: "Gäst namn",
+      spotifyUrl: "",
+      appleMusicUrl: "",
+      summary: "Det senaste avsnittet av Alla Bitar.",
+      description: "",
+      image: null
+    },
+    episodes: []
+  };
+
+  function esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderParas(text) {
+    if (!text) return '';
+    return text.split('\n\n').map(p =>
+      `<p>${esc(p).replace(/\n/g, '<br>')}</p>`
+    ).join('');
+  }
+
+  function platformLink(url, type) {
+    if (!url) return '';
+    const icon  = type === 'spotify' ? SPOTIFY_SVG : APPLE_SVG;
+    const label = type === 'spotify' ? 'Spotify' : 'Apple Podcasts';
+    return `<a href="${esc(url)}" class="platform-link ${type}" target="_blank" rel="noopener noreferrer">${icon}<span>${label}</span></a>`;
+  }
+
+  function renderHero(show) {
+    const hasImage = show.image;
+    document.getElementById('hero-section').innerHTML = `
+      <section class="hero">
+        <div class="container">
+          ${hasImage ? `<div class="hero-image-slot visible"><img src="${esc(show.image)}" alt=""></div>` : ''}
+          <h1 class="show-name">
+            <span class="show-name-sans">${esc(show.name.split(' ')[0])}</span
+            ><span class="show-name-serif"> ${esc(show.name.split(' ').slice(1).join(' '))}</span>
+          </h1>
+          <p class="show-tagline">${esc(show.tagline)}</p>
+          <p class="show-description">${esc(show.description)}</p>
+          ${show.expandedDescription ? `
+            <button class="expand-btn" data-target="hero-expand" aria-expanded="false">
+              <span class="btn-label">Om podden</span>
+              <span class="arrow" aria-hidden="true">↓</span>
+            </button>
+            <div class="expandable" id="hero-expand">
+              <div>
+                <div class="hero-expanded">${renderParas(show.expandedDescription)}</div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderLatestEpisode(ep) {
+    const hasImage = ep.image;
+    document.getElementById('latest-section').innerHTML = `
+      <section class="latest-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="label">Senaste avsnittet</span>
+          </div>
+          <article class="latest-card">
+            ${hasImage ? `<div class="card-image-slot visible"><img src="${esc(ep.image)}" alt=""></div>` : ''}
+            <div class="latest-body">
+              <div class="latest-label-row">
+                <span class="label">Avsnitt</span>
+                <span class="ep-number-serif">${esc(ep.number)}</span>
+              </div>
+              <h2 class="latest-title">${esc(ep.title)}</h2>
+              <p class="latest-guest">${esc(ep.guest)}</p>
+              <div class="platform-links">
+                ${platformLink(ep.spotifyUrl, 'spotify')}
+                ${platformLink(ep.appleMusicUrl, 'apple')}
+              </div>
+              <p class="latest-summary">${esc(ep.summary)}</p>
+              ${ep.description ? `
+                <button class="expand-btn" data-target="latest-expand" aria-expanded="false">
+                  <span class="btn-label">Mer</span>
+                  <span class="arrow" aria-hidden="true">↓</span>
+                </button>
+                <div class="expandable" id="latest-expand">
+                  <div>
+                    <div class="latest-description">${renderParas(ep.description)}</div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </article>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderEpisodeCard(ep) {
+    const hasImage = ep.image;
+    const expandId = `expand-${esc(ep.id)}`;
+    return `
+      <article class="episode-card">
+        ${hasImage ? `<div class="ep-card-image-slot visible"><img src="${esc(ep.image)}" alt=""></div>` : ''}
+        <div class="ep-card-body">
+          <div class="ep-label-row">
+            <span class="label">Avs.</span>
+            <span class="ep-num-serif">${esc(ep.number)}</span>
+          </div>
+          <h3 class="ep-title">${esc(ep.title)}</h3>
+          <p class="ep-guest">${esc(ep.guest)}</p>
+          <div class="platform-links">
+            ${platformLink(ep.spotifyUrl, 'spotify')}
+            ${platformLink(ep.appleMusicUrl, 'apple')}
+          </div>
+          <p class="ep-summary">${esc(ep.summary)}</p>
+          ${ep.description ? `
+            <button class="expand-btn" data-target="${expandId}" aria-expanded="false">
+              <span class="btn-label">Mer</span>
+              <span class="arrow" aria-hidden="true">↓</span>
+            </button>
+            <div class="expandable" id="${expandId}">
+              <div>
+                <div class="ep-description">${renderParas(ep.description)}</div>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      </article>
+    `;
+  }
+
+  function renderEpisodes(episodes) {
+    const grid = episodes.length
+      ? `<div class="episodes-grid">${episodes.map(renderEpisodeCard).join('')}</div>`
+      : '';
+    document.getElementById('episodes-section').innerHTML = `
+      <section class="episodes-section">
+        <div class="container">
+          ${episodes.length ? `<div class="section-header"><span class="label">Alla avsnitt</span></div>` : ''}
+          ${grid}
+        </div>
+      </section>
+    `;
+  }
+
+  function renderAll(data) {
+    renderHero(data.show);
+    renderLatestEpisode(data.latestEpisode);
+    renderEpisodes(data.episodes);
+  }
+
+  // Single delegated handler for all expand buttons
+  document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.expand-btn');
+    if (!btn) return;
+    const target = document.getElementById(btn.dataset.target);
+    if (!target) return;
+    const isOpen = target.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+    btn.setAttribute('aria-expanded', isOpen);
+    const lbl = btn.querySelector('.btn-label');
+    if (lbl) lbl.textContent = isOpen ? 'Stäng' : (btn.dataset.target === 'hero-expand' ? 'Om podden' : 'Mer');
+  });
+
+  if (window.parent !== window) {
+    // Running inside the editor iframe — wait for data via postMessage
+    window.parent.postMessage('ALLABITAR_READY', '*');
+    window.addEventListener('message', function (e) {
+      if (e.data && e.data.allabitar) renderAll(e.data.allabitar);
+    });
+  } else {
+    // Normal site load — fetch data.json, fall back to embedded sample
+    (async function () {
+      try {
+        const res = await fetch('data.json');
+        if (!res.ok) throw new Error();
+        renderAll(await res.json());
+      } catch {
+        renderAll(FALLBACK_DATA);
+      }
+    })();
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alla Bitar — Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font: 'Inter', -apple-system, sans-serif;
+      --bg: #faf9f7;
+      --surface: #ffffff;
+      --border: #e8e4de;
+      --border-subtle: #f0ece6;
+      --text: #1a1814;
+      --text-2: #6b6560;
+      --text-3: #9e9890;
+      --accent: #1a1814;
+      --radius: 8px;
+      --tab-h: 44px;
+    }
+
+    html, body, #root { height: 100%; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ── */
+    .app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Left: Editor ── */
+    .editor {
+      width: 52%;
+      min-width: 380px;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+    }
+
+    .editor-head {
+      padding: 18px 24px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .editor-wordmark {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+    .editor-wordmark span {
+      font-weight: 400;
+      color: var(--text-3);
+      margin-left: 4px;
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      margin: 0 -24px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      height: var(--tab-h);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      font-family: var(--font);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--text-2); }
+    .tab-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+
+    /* ── Scrollable form area ── */
+    .editor-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 24px 0;
+    }
+
+    /* ── Footer / actions ── */
+    .editor-foot {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      height: 36px;
+      padding: 0 16px;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      border: none;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: 0.8; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+
+    .btn-import {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-import input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      font-size: 0;
+    }
+
+    .save-note {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-left: auto;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    /* ── Fields ── */
+    .field {
+      margin-bottom: 18px;
+    }
+    .field-label {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+    .field-hint {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+    .field-input {
+      width: 100%;
+      padding: 9px 11px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--text);
+      transition: border-color 0.15s;
+      resize: vertical;
+    }
+    .field-input:focus {
+      outline: none;
+      border-color: var(--text-2);
+    }
+    .field-input:disabled {
+      background: var(--bg);
+      color: var(--text-3);
+      cursor: not-allowed;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      padding: 0 0 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+    }
+
+    /* ── Episodes list ── */
+    .ep-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-bottom: 20px;
+    }
+
+    .ep-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .ep-item.active { border-color: var(--text-2); }
+
+    .ep-item-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      cursor: pointer;
+      gap: 10px;
+      background: var(--surface);
+      user-select: none;
+    }
+    .ep-item-header:hover { background: var(--bg); }
+
+    .ep-item-num {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      min-width: 32px;
+    }
+    .ep-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ep-item-title.empty { color: var(--text-3); font-style: italic; }
+
+    .ep-item-actions {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .ep-action-btn {
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .ep-action-btn:hover { background: var(--border-subtle); color: var(--text); }
+    .ep-action-btn:disabled { opacity: 0.3; cursor: default; }
+    .ep-action-btn.danger:hover { background: #fee2e2; color: #dc2626; }
+
+    .ep-chevron {
+      font-size: 14px;
+      color: var(--text-3);
+      transition: transform 0.2s;
+      margin-left: 4px;
+    }
+    .ep-item.active .ep-chevron { transform: rotate(45deg); }
+
+    .ep-form {
+      padding: 16px 14px 18px;
+      border-top: 1px solid var(--border-subtle);
+      background: #fdfcfb;
+    }
+
+    .add-ep-btn {
+      width: 100%;
+      height: 40px;
+      background: none;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      margin-top: 8px;
+    }
+    .add-ep-btn:hover { border-color: var(--text-2); color: var(--text-2); }
+
+    /* ── Right: Preview ── */
+    .preview-panel {
+      flex: 1;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .preview-bar {
+      height: 36px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .preview-bar-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+    .preview-bar-label {
+      font-size: 11px;
+      color: var(--text-3);
+      letter-spacing: 0.06em;
+      margin-left: 4px;
+    }
+
+    .preview-iframe {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: white;
+      display: block;
+    }
+
+    .preview-offline {
+      position: absolute;
+      inset: 36px 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 40px;
+      text-align: center;
+      background: var(--bg);
+    }
+    .preview-offline p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-2);
+      max-width: 300px;
+    }
+    .preview-offline code {
+      font-size: 12px;
+      background: var(--border-subtle);
+      padding: 3px 7px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+  const { useState, useEffect, useRef, useCallback } = React;
+
+  const EMPTY_DATA = {
+    show: { name: 'Alla Bitar', tagline: '', description: '', expandedDescription: '' },
+    latestEpisode: { number: '', title: '', guest: '', spotifyUrl: '', appleMusicUrl: '', summary: '', description: '', image: null },
+    episodes: []
+  };
+
+  function newEpisode() {
+    return { id: `ep${Date.now()}`, number: '', title: '', guest: '', spotifyUrl: '', appleMusicUrl: '', summary: '', description: '', image: null };
+  }
+
+  /* ── Field components ── */
+  function Field({ label, hint, value, onChange, multiline, rows, placeholder, disabled }) {
+    const shared = { value: value ?? '', onChange: e => onChange(e.target.value), placeholder, disabled, className: 'field-input' };
+    return (
+      <div className="field">
+        <label className="field-label">{label}</label>
+        {hint && <p className="field-hint">{hint}</p>}
+        {multiline
+          ? <textarea {...shared} rows={rows || 4} style={{minHeight: rows ? undefined : 80}} />
+          : <input type="text" {...shared} />}
+      </div>
+    );
+  }
+
+  /* ── Show Info tab ── */
+  function ShowInfoTab({ data, onChange }) {
+    const up = (k, v) => onChange({ ...data, [k]: v });
+    return (
+      <div>
+        <p className="section-title">Programinformation</p>
+        <Field label="Poddnamn" value={data.name} onChange={v => up('name', v)} placeholder="Alla Bitar" />
+        <Field label="Tagline" hint="En kort rad som syns under namnet" value={data.tagline} onChange={v => up('tagline', v)} placeholder="En podd om musik och de som skapar den." />
+        <Field label="Kort beskrivning" hint="Alltid synlig i hero-ytan" value={data.description} onChange={v => up('description', v)} multiline rows={3} placeholder="Varje avsnitt ett samtal…" />
+        <Field label="Utökad beskrivning" hint="Visas när man klickar "Om podden"" value={data.expandedDescription} onChange={v => up('expandedDescription', v)} multiline rows={5} placeholder="Mer om podden, historiken, hur ofta den ges ut…" />
+      </div>
+    );
+  }
+
+  /* ── Episode fields (shared by Latest and regular episodes) ── */
+  function EpisodeFields({ ep, onChange }) {
+    const up = (k, v) => onChange({ ...ep, [k]: v });
+    return (
+      <>
+        <div className="field-row">
+          <Field label="Avsnitt nr" value={ep.number} onChange={v => up('number', v)} placeholder="42" />
+          <Field label="Gäst" value={ep.guest} onChange={v => up('guest', v)} placeholder="Förnamn Efternamn" />
+        </div>
+        <Field label="Titel" value={ep.title} onChange={v => up('title', v)} placeholder="Episodens titel" />
+        <div className="field-row">
+          <Field label="Spotify-länk" value={ep.spotifyUrl} onChange={v => up('spotifyUrl', v)} placeholder="https://open.spotify.com/episode/…" />
+          <Field label="Apple Podcasts-länk" value={ep.appleMusicUrl} onChange={v => up('appleMusicUrl', v)} placeholder="https://podcasts.apple.com/…" />
+        </div>
+        <Field label="Sammanfattning" hint="3–4 rader, alltid synlig" value={ep.summary} onChange={v => up('summary', v)} multiline rows={4} placeholder="Kort beskrivning av avsnittet…" />
+        <Field label="Utökad beskrivning" hint="Visas vid expandering" value={ep.description} onChange={v => up('description', v)} multiline rows={6} placeholder="Längre text, kan ha styckebrytningar med blankrad…" />
+        <Field label="Bild" hint="Bild-stöd kommer framöver" disabled value="" onChange={() => {}} placeholder="— kommer snart —" />
+      </>
+    );
+  }
+
+  /* ── Latest Episode tab ── */
+  function LatestEpisodeTab({ data, onChange }) {
+    return (
+      <div>
+        <p className="section-title">Senaste avsnittet</p>
+        <EpisodeFields ep={data} onChange={onChange} />
+      </div>
+    );
+  }
+
+  /* ── Episodes tab ── */
+  function EpisodesTab({ episodes, onChange }) {
+    const [activeId, setActiveId] = useState(null);
+
+    const updateEp = (id, updated) => onChange(episodes.map(ep => ep.id === id ? updated : ep));
+    const deleteEp = (id) => { onChange(episodes.filter(ep => ep.id !== id)); if (activeId === id) setActiveId(null); };
+    const moveEp = (id, dir) => {
+      const idx = episodes.findIndex(e => e.id === id);
+      if (dir === 'up' && idx === 0) return;
+      if (dir === 'down' && idx === episodes.length - 1) return;
+      const next = [...episodes];
+      const swap = dir === 'up' ? idx - 1 : idx + 1;
+      [next[idx], next[swap]] = [next[swap], next[idx]];
+      onChange(next);
+    };
+    const addEp = () => {
+      const ep = newEpisode();
+      onChange([ep, ...episodes]);
+      setActiveId(ep.id);
+    };
+
+    return (
+      <div>
+        <p className="section-title">Avsnitt ({episodes.length})</p>
+        <div className="ep-list">
+          {episodes.map((ep, idx) => (
+            <div key={ep.id} className={`ep-item${activeId === ep.id ? ' active' : ''}`}>
+              <div className="ep-item-header" onClick={() => setActiveId(activeId === ep.id ? null : ep.id)}>
+                <span className="ep-item-num">{ep.number || '—'}</span>
+                <span className={`ep-item-title${!ep.title ? ' empty' : ''}`}>{ep.title || '(titel saknas)'}</span>
+                <div className="ep-item-actions" onClick={e => e.stopPropagation()}>
+                  <button className="ep-action-btn" onClick={() => moveEp(ep.id, 'up')} disabled={idx === 0} title="Flytta upp">↑</button>
+                  <button className="ep-action-btn" onClick={() => moveEp(ep.id, 'down')} disabled={idx === episodes.length - 1} title="Flytta ner">↓</button>
+                  <button className="ep-action-btn danger" onClick={() => { if (confirm(`Ta bort "${ep.title || 'avsnitt'}"?`)) deleteEp(ep.id); }} title="Ta bort">×</button>
+                </div>
+                <span className="ep-chevron">+</span>
+              </div>
+              {activeId === ep.id && (
+                <div className="ep-form">
+                  <EpisodeFields ep={ep} onChange={updated => updateEp(ep.id, updated)} />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        <button className="add-ep-btn" onClick={addEp}>+ Lägg till avsnitt</button>
+      </div>
+    );
+  }
+
+  /* ── Main App ── */
+  function App() {
+    const [data, setData] = useState(EMPTY_DATA);
+    const [tab, setTab] = useState('show');
+    const [iframeReady, setIframeReady] = useState(false);
+    const [previewOnline, setPreviewOnline] = useState(true);
+    const iframeRef = useRef(null);
+    const debounceRef = useRef(null);
+    const onlineTimerRef = useRef(null);
+
+    // Try loading data.json on startup
+    useEffect(() => {
+      fetch('data.json')
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(d => setData(d))
+        .catch(() => {});
+    }, []);
+
+    // Listen for iframe ready signal
+    useEffect(() => {
+      const handler = e => {
+        if (e.data === 'ALLABITAR_READY') {
+          setIframeReady(true);
+          setPreviewOnline(true);
+        }
+      };
+      window.addEventListener('message', handler);
+      // If no ready signal in 3s, assume file:// mode
+      onlineTimerRef.current = setTimeout(() => setPreviewOnline(false), 3000);
+      return () => {
+        window.removeEventListener('message', handler);
+        clearTimeout(onlineTimerRef.current);
+      };
+    }, []);
+
+    // Send data to iframe (debounced)
+    useEffect(() => {
+      if (!iframeReady) return;
+      clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        iframeRef.current?.contentWindow?.postMessage({ allabitar: data }, '*');
+      }, 350);
+      return () => clearTimeout(debounceRef.current);
+    }, [data, iframeReady]);
+
+    const updateShow = v => setData(d => ({ ...d, show: v }));
+    const updateLatest = v => setData(d => ({ ...d, latestEpisode: v }));
+    const updateEpisodes = v => setData(d => ({ ...d, episodes: v }));
+
+    const exportData = () => {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'data.json';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    };
+
+    const importFile = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try { setData(JSON.parse(ev.target.result)); }
+        catch { alert('Ogiltig JSON-fil.'); }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    };
+
+    const TABS = [
+      { id: 'show',     label: 'Programinfo' },
+      { id: 'latest',   label: 'Senaste' },
+      { id: 'episodes', label: 'Avsnitt' },
+    ];
+
+    return (
+      <div className="app">
+        {/* ── Editor panel ── */}
+        <div className="editor">
+          <div className="editor-head">
+            <div className="editor-wordmark">Alla Bitar <span>editor</span></div>
+            <div className="tab-bar">
+              {TABS.map(t => (
+                <button key={t.id} className={`tab-btn${tab === t.id ? ' active' : ''}`} onClick={() => setTab(t.id)}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="editor-body">
+            {tab === 'show'     && <ShowInfoTab     data={data.show}          onChange={updateShow} />}
+            {tab === 'latest'   && <LatestEpisodeTab data={data.latestEpisode} onChange={updateLatest} />}
+            {tab === 'episodes' && <EpisodesTab      episodes={data.episodes}  onChange={updateEpisodes} />}
+          </div>
+
+          <div className="editor-foot">
+            <button className="btn btn-primary" onClick={exportData}>Ladda ner data.json</button>
+            <label className="btn btn-secondary btn-import">
+              Importera
+              <input type="file" accept=".json" onChange={importFile} />
+            </label>
+            <p className="save-note">Ladda ner och ersätt<br/>data.json i mappen</p>
+          </div>
+        </div>
+
+        {/* ── Preview panel ── */}
+        <div className="preview-panel">
+          <div className="preview-bar">
+            <div className="preview-bar-dot" />
+            <div className="preview-bar-dot" />
+            <div className="preview-bar-dot" />
+            <span className="preview-bar-label">Förhandsgranskning</span>
+          </div>
+          <iframe
+            ref={iframeRef}
+            src="index.html"
+            className="preview-iframe"
+            title="Förhandsgranskning"
+            style={{ display: previewOnline ? 'block' : 'none' }}
+          />
+          {!previewOnline && (
+            <div className="preview-offline">
+              <p>Förhandsgranskning kräver en lokal server.</p>
+              <p>Starta servern och öppna editorn via:</p>
+              <p><code>python3 start-server.py</code></p>
+              <p style={{ marginTop: 4 }}>Editorn och sajten finns sedan på<br/><code>localhost:8000</code></p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
