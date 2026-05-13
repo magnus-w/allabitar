@@ -474,7 +474,7 @@
         <Field label="Poddnamn" value={data.name} onChange={v => up('name', v)} placeholder="Alla Bitar" />
         <Field label="Tagline" hint="En kort rad som syns under namnet" value={data.tagline} onChange={v => up('tagline', v)} placeholder="En podd om musik och de som skapar den." />
         <Field label="Kort beskrivning" hint="Alltid synlig i hero-ytan" value={data.description} onChange={v => up('description', v)} multiline rows={3} placeholder="Varje avsnitt ett samtal…" />
-        <Field label="Utökad beskrivning" hint="Visas när man klickar "Om podden"" value={data.expandedDescription} onChange={v => up('expandedDescription', v)} multiline rows={5} placeholder="Mer om podden, historiken, hur ofta den ges ut…" />
+        <Field label="Utökad beskrivning" hint={'Visas när man klickar "Om podden"'} value={data.expandedDescription} onChange={v => up('expandedDescription', v)} multiline rows={5} placeholder="Mer om podden, historiken, hur ofta den ges ut…" />
       </div>
     );
   }
