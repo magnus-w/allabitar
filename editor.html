@@ -156,10 +156,34 @@
     .save-note {
       font-size: 11px;
       color: var(--text-3);
-      margin-left: auto;
-      text-align: right;
       line-height: 1.4;
     }
+
+    .foot-file {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .foot-filename {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .save-status {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .save-status.saving { color: var(--text-3); }
+    .save-status.saved  { color: #2d9e6b; }
+    .save-status.error  { color: #dc2626; }
 
     /* ── Fields ── */
     .field {
@@ -567,23 +591,26 @@
     );
   }
 
+  const hasFileAccess = 'showOpenFilePicker' in window;
+
   /* ── Main App ── */
   function App() {
     const [data, setData] = useState(EMPTY_DATA);
     const [tab, setTab] = useState('show');
     const [iframeReady, setIframeReady] = useState(false);
     const [previewOnline, setPreviewOnline] = useState(true);
+    const [fileName, setFileName] = useState(null);
+    const [saveStatus, setSaveStatus] = useState(null); // null | 'saving' | 'saved' | 'error'
     const iframeRef = useRef(null);
+    const fileHandleRef = useRef(null);
+    const dataRef = useRef(data);
     const debounceRef = useRef(null);
+    const saveTimerRef = useRef(null);
+    const statusTimerRef = useRef(null);
     const onlineTimerRef = useRef(null);
 
-    // Try loading data.json on startup
-    useEffect(() => {
-      fetch('data.json')
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(d => setData(d))
-        .catch(() => {});
-    }, []);
+    // Keep dataRef in sync so saveFile always writes the latest data
+    useEffect(() => { dataRef.current = data; }, [data]);
 
     // Listen for iframe ready signal
     useEffect(() => {
@@ -591,10 +618,10 @@
         if (e.data === 'ALLABITAR_READY') {
           setIframeReady(true);
           setPreviewOnline(true);
+          clearTimeout(onlineTimerRef.current);
         }
       };
       window.addEventListener('message', handler);
-      // If no ready signal in 3s, assume file:// mode
       onlineTimerRef.current = setTimeout(() => setPreviewOnline(false), 3000);
       return () => {
         window.removeEventListener('message', handler);
@@ -612,10 +639,60 @@
       return () => clearTimeout(debounceRef.current);
     }, [data, iframeReady]);
 
-    const updateShow = v => setData(d => ({ ...d, show: v }));
-    const updateLatest = v => setData(d => ({ ...d, latestEpisode: v }));
-    const updateEpisodes = v => setData(d => ({ ...d, episodes: v }));
+    const saveFile = useCallback(async () => {
+      if (!fileHandleRef.current) return;
+      setSaveStatus('saving');
+      try {
+        const writable = await fileHandleRef.current.createWritable();
+        await writable.write(JSON.stringify(dataRef.current, null, 2));
+        await writable.close();
+        clearTimeout(statusTimerRef.current);
+        setSaveStatus('saved');
+        statusTimerRef.current = setTimeout(() => setSaveStatus(null), 2500);
+      } catch (e) {
+        console.error(e);
+        setSaveStatus('error');
+      }
+    }, []);
 
+    // Auto-save 500ms after each change (only when a file is open)
+    useEffect(() => {
+      if (!fileHandleRef.current) return;
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(saveFile, 500);
+      return () => clearTimeout(saveTimerRef.current);
+    }, [data, saveFile]);
+
+    // Cmd+S / Ctrl+S
+    useEffect(() => {
+      const handler = e => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+          e.preventDefault();
+          saveFile();
+        }
+      };
+      document.addEventListener('keydown', handler);
+      return () => document.removeEventListener('keydown', handler);
+    }, [saveFile]);
+
+    const openFile = async () => {
+      try {
+        const [handle] = await window.showOpenFilePicker({
+          types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+          multiple: false
+        });
+        const file = await handle.getFile();
+        const text = await file.text();
+        setData(JSON.parse(text));
+        fileHandleRef.current = handle;
+        setFileName(handle.name);
+        setSaveStatus(null);
+      } catch (e) {
+        if (e.name !== 'AbortError') { console.error(e); alert('Kunde inte öppna filen.'); }
+      }
+    };
+
+    // Fallback: download for browsers without File System Access API
     const exportData = () => {
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -665,12 +742,34 @@
           </div>
 
           <div className="editor-foot">
-            <button className="btn btn-primary" onClick={exportData}>Ladda ner data.json</button>
-            <label className="btn btn-secondary btn-import">
-              Importera
-              <input type="file" accept=".json" onChange={importFile} />
-            </label>
-            <p className="save-note">Ladda ner och ersätt<br/>data.json i mappen</p>
+            {hasFileAccess ? (
+              fileName ? (
+                <>
+                  <button className="btn btn-secondary" onClick={openFile}>Byt fil</button>
+                  <div className="foot-file">
+                    <span className="foot-filename">{fileName}</span>
+                    {saveStatus === 'saving' && <span className="save-status saving">Sparar…</span>}
+                    {saveStatus === 'saved'  && <span className="save-status saved">Sparat ✓</span>}
+                    {saveStatus === 'error'  && <span className="save-status error">Fel vid sparning</span>}
+                  </div>
+                  <p className="save-note">⌘S för manuell sparning</p>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-primary" onClick={openFile}>Öppna data.json</button>
+                  <p className="save-note">Välj filen i ditt lokala repo –<br/>sparas automatiskt vid ändringar</p>
+                </>
+              )
+            ) : (
+              <>
+                <button className="btn btn-primary" onClick={exportData}>Ladda ner data.json</button>
+                <label className="btn btn-secondary btn-import">
+                  Importera
+                  <input type="file" accept=".json" onChange={importFile} />
+                </label>
+                <p className="save-note">Ladda ner och ersätt data.json i mappen</p>
+              </>
+            )}
           </div>
         </div>
 
