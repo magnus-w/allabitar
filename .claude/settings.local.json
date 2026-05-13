@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Read(//Users/magnus/GitHub/linrnotes/**)",
+      "Bash(python3 start-server.py)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/data.json)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8000/editor.html)",
+      "Bash(node *)",
+      "Bash(kill %1)",
+      "Bash(git commit *)",
+      "Bash(git pull *)"
+    ]
+  }
+}
