@@ -331,6 +331,21 @@
       color: var(--text-secondary);
     }
     .ep-description p + p { margin-top: 12px; }
+  @media (max-width: 640px) {
+    /* Tagline: step up to medium weight so it reads distinct from the body copy below */
+    .show-tagline { font-weight: 500; }
+
+    /* Uniform card design — section labels ("SENASTE AVSNITTET" / "ALLA AVSNITT")
+       do the differentiating work; no need for visual size difference on mobile */
+    .latest-guest { font-style: normal; }
+
+    .ep-card-body   { padding: 24px 24px 22px; }
+    .ep-num-serif   { font-size: 22px; }
+    .ep-title       { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .ep-guest       { font-size: 15px; }
+    .ep-summary     { font-size: 15px; line-height: 1.75; }
+    .ep-description p { font-size: 15px; line-height: 1.75; }
+  }
   </style>
 </head>
 <body>
