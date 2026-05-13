@@ -202,6 +202,31 @@
       cursor: not-allowed;
     }
 
+    .image-preview {
+      margin-top: 8px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--border-subtle);
+      aspect-ratio: 16 / 7;
+      position: relative;
+    }
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .image-preview-error {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
     .field-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -430,6 +455,37 @@
     );
   }
 
+  /* ── Image field with preview ── */
+  function ImageField({ value, onChange }) {
+    const [error, setError] = React.useState(false);
+    const handleChange = v => { setError(false); onChange(v || null); };
+    return (
+      <div className="field">
+        <label className="field-label">Bild</label>
+        <p className="field-hint">Extern URL (https://…) eller bildfil i repots images/-mapp (t.ex. images/avsnitt42.jpg)</p>
+        <input
+          type="text"
+          value={value ?? ''}
+          onChange={e => handleChange(e.target.value)}
+          className="field-input"
+          placeholder="https://… eller images/filnamn.jpg"
+        />
+        {value && (
+          <div className="image-preview">
+            <img
+              src={value}
+              alt=""
+              onLoad={() => setError(false)}
+              onError={() => setError(true)}
+              style={{ display: error ? 'none' : 'block' }}
+            />
+            {error && <div className="image-preview-error">Bilden kunde inte laddas</div>}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   /* ── Episode fields (shared by Latest and regular episodes) ── */
   function EpisodeFields({ ep, onChange }) {
     const up = (k, v) => onChange({ ...ep, [k]: v });
@@ -446,7 +502,7 @@
         </div>
         <Field label="Sammanfattning" hint="3–4 rader, alltid synlig" value={ep.summary} onChange={v => up('summary', v)} multiline rows={4} placeholder="Kort beskrivning av avsnittet…" />
         <Field label="Utökad beskrivning" hint="Visas vid expandering" value={ep.description} onChange={v => up('description', v)} multiline rows={6} placeholder="Längre text, kan ha styckebrytningar med blankrad…" />
-        <Field label="Bild" hint="Bild-stöd kommer framöver" disabled value="" onChange={() => {}} placeholder="— kommer snart —" />
+        <ImageField value={ep.image} onChange={v => up('image', v)} />
       </>
     );
   }
